@@ -29,7 +29,7 @@ const dataSetHandle = async (regionCode: string, list: object[]) => {
   geojson.features.forEach((element: any) => {
     cityCenter[element.properties.name] = element.properties.centroid || element.properties.center;
   });
-  //当前中心点如果有此条数据中心点则赋值x，y当然这个x,y也可以后端返回进行大点，前端省去多行代码
+  //当前中心点如果有此条数据中心点则赋值x，y当然这n个x,y也可以后端返回进行大点，前端省去多行代码
   list.forEach((item: any) => {
     if (cityCenter[item.name]) {
       mapData.push({

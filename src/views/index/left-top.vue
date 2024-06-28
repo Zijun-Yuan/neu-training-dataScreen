@@ -12,7 +12,6 @@ const state = reactive({
   totalNum: 0,
 });
 
-
 const getData = () => {
   countDeviceNum().then((res) => {
     console.log("左上--设备总览",res);
