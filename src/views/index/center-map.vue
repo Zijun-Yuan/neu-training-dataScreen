@@ -5,11 +5,12 @@ import { registerMap, getMap } from "echarts/core";
 import { optionHandle, regionCodes } from "./center.map";
 import BorderBox13 from "@/components/datav/border-box-13";
 import { ElMessage } from "element-plus";
+import { centerTopData } from "@/api/dataScreen";
 
 import type { MapdataType } from "./center.map";
 
 const option = ref({});
-const code = ref("china"); //china 代表中国 其他地市是行政编码
+let code = ref("100000"); //100000 代表中国 其他地市是行政编码
 
 withDefaults(
   defineProps<{
@@ -44,18 +45,20 @@ const dataSetHandle = async (regionCode: string, list: object[]) => {
 };
 
 const getData = async (regionCode: string) => {
-  centerMap({ regionCode: regionCode })
-    .then((res) => {
-      console.log("中上--设备分布", res);
-      if (res.success) {
-        dataSetHandle(res.data.regionCode, res.data.dataList);
-      } else {
-        ElMessage.error(res.msg);
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
+  try {
+    const response = await centerTopData({ regionCode: regionCode });
+    console.log("中上--城市AQI详情 ", response);
+    if (response.data.code === 0) {
+      const regionData = response.data.data[0]; // 假设只有一个元素
+      const regionCode = regionData.regionCode;
+      const dataList = regionData.dataList;
+      dataSetHandle(regionCode, dataList);
+    } else {
+      ElMessage.error(response.data.msg);
+    }
+  } catch (error) {
+    ElMessage.error("请求失败，请检查网络连接");
+  }
 };
 const getGeojson = (regionCode: string) => {
   return new Promise<boolean>(async (resolve) => {
@@ -96,7 +99,7 @@ const mapClick = (params: any) => {
     </div>
     <div class="mapwrap">
       <BorderBox13>
-        <div class="quanguo" @click="getData('china')" v-if="code !== 'china'">中国</div>
+        <div class="quanguo" @click="getData('100000')" v-if="code !== '100000'">中国</div>
         <v-chart
           class="chart"
           :option="option"

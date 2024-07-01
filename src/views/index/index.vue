@@ -17,38 +17,38 @@ import RightBottom from "./right-bottom.vue";
         <div class="item">实时监测</div>
         <div class="item">统计分析</div>
       </div> -->
-      <ItemWrap class="contetn_left-top contetn_lr-item" title="设备总览">
+      <ItemWrap class="contetn_left-top contetn_lr-item" title="信息总览">
         <LeftTop />
       </ItemWrap>
-      <ItemWrap class="contetn_left-center contetn_lr-item" title="用户总览">
+      <ItemWrap class="contetn_left-center contetn_lr-item" title="AQI总览">
         <LeftCenter />
       </ItemWrap>
       <ItemWrap
         class="contetn_left-bottom contetn_lr-item"
-        title="设备提醒"
+        title="监督员反馈 - 最新"
         style="padding: 0 10px 16px 10px"
       >
         <LeftBottom />
       </ItemWrap>
     </div>
     <div class="contetn_center">
-      <CenterMap class="contetn_center_top" title="设备分布图" />
-      <ItemWrap class="contetn_center-bottom" title="安装计划">
+      <CenterMap class="contetn_center_top" title="城市污染分布图（AQI）" />
+      <ItemWrap class="contetn_center-bottom" title="污染-城市覆盖统计">
         <CenterBottom />
       </ItemWrap>
     </div>
     <div class="contetn_right">
-      <ItemWrap class="contetn_left-bottom contetn_lr-item" title="报警次数">
+      <ItemWrap class="contetn_left-bottom contetn_lr-item" title="污染超标次数">
         <RightTop />
       </ItemWrap>
       <ItemWrap
         class="contetn_left-bottom contetn_lr-item"
-        title="报警排名(TOP8)"
+        title="城市污染排名(TOP8)"
         style="padding: 0 10px 16px 10px"
       >
         <RightCenter />
       </ItemWrap>
-      <ItemWrap class="contetn_left-bottom contetn_lr-item" title="数据统计图 ">
+      <ItemWrap class="contetn_left-bottom contetn_lr-item" title="网格检测信息 - 最新">
         <RightBottom />
       </ItemWrap>
     </div>

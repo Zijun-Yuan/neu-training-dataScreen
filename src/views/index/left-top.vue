@@ -1,32 +1,34 @@
 <script setup lang="ts">
 import { reactive, ref } from "vue";
-import { countDeviceNum } from "@/api";
+// import { countDeviceNum } from "@/api";
+import { leftTopData } from '@/api/dataScreen';
 import CountUp from "@/components/count-up";
 import {ElMessage} from "element-plus"
 
 const duration = ref(2);
 const state = reactive({
-  alarmNum: 0,
-  offlineNum: 0,
-  onlineNum: 0,
   totalNum: 0,
+  supervisorNum: 0,
+  inspectorNum: 0,
+  exceedNum: 0,
 });
-
-const getData = () => {
-  countDeviceNum().then((res) => {
-    console.log("左上--设备总览",res);
-    if (res.success) {
-      state.alarmNum = res.data.alarmNum;
-      state.offlineNum = res.data.offlineNum;
-      state.onlineNum = res.data.onlineNum;
-      state.totalNum = res.data.totalNum;
-    }else{
-      ElMessage.error(res.msg)
+const getData = async () => {
+  try {
+    const response = await leftTopData();
+    if (response.data.code === 0) {
+      console.log("左上--数据总览", response.data.data);
+      state.totalNum = response.data.data.infoTotal;
+      state.supervisorNum = response.data.data.infoSupervisorCount;
+      state.inspectorNum = response.data.data.infoInspectorCount;
+      state.exceedNum = response.data.data.exceedTotal;
+    } else {
+      ElMessage.error(response.data.msg);
     }
-  }).catch(err=>{
-    ElMessage.error(err)
-  });;
+  } catch (error) {
+    ElMessage.error("请求失败，请检查网络连接");
+  }
 };
+
 getData();
 </script>
 
@@ -36,25 +38,25 @@ getData();
       <div class="user_Overview_nums allnum">
         <CountUp :endVal="state.totalNum" :duration="duration" />
       </div>
-      <p>总设备数</p>
+      <p>信息总数</p>
     </li>
     <li class="user_Overview-item" style="color: #07f7a8">
       <div class="user_Overview_nums online">
-        <CountUp :endVal="state.onlineNum" :duration="duration" />
+        <CountUp :endVal="state.supervisorNum" :duration="duration" />
       </div>
-      <p>在线数</p>
+      <p>监督信息数量</p>
     </li>
     <li class="user_Overview-item" style="color: #e3b337">
       <div class="user_Overview_nums offline">
-        <CountUp :endVal="state.offlineNum" :duration="duration" />
+        <CountUp :endVal="state.inspectorNum" :duration="duration" />
       </div>
-      <p>掉线数</p>
+      <p>网格信息数量</p>
     </li>
     <li class="user_Overview-item" style="color: #f5023d">
       <div class="user_Overview_nums laramnum">
-        <CountUp :endVal="state.alarmNum" :duration="duration" />
+        <CountUp :endVal="state.exceedNum" :duration="duration" />
       </div>
-      <p>告警次数</p>
+      <p>污染超标数量</p>
     </li>
   </ul>
 </template>

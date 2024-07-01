@@ -1,16 +1,18 @@
 <script setup lang="ts">
 import { ref, reactive } from "vue";
 import { graphic } from "echarts/core";
-import { countUserNum } from "@/api";
+import { leftCenterData } from "@/api/dataScreen";
 import {ElMessage} from "element-plus"
 
 let colors = ["#0BFC7F", "#A0A0A0", "#F48C02", "#F4023C"];
 const option = ref({});
 const state = reactive({
-  lockNum: 0,
-  offlineNum: 0,
-  onlineNum: 0,
-  alarmNum: 0,
+  aqiLevel_1: 0,
+  aqiLevel_2: 0,
+  aqiLevel_3: 0,
+  aqiLevel_4: 0,
+  aqiLevel_5: 0,
+  aqiLevel_6: 0,
   totalNum: 0,
 });
 const echartsGraphic = (colors: string[]) => {
@@ -19,22 +21,25 @@ const echartsGraphic = (colors: string[]) => {
     { offset: 1, color: colors[1] },
   ]);
 };
-const getData = () => {
-  countUserNum().then((res) => {
-    console.log("左中--用户总览",res);
-    if (res.success) {
-      state.lockNum = res.data.lockNum;
-      state.offlineNum = res.data.offlineNum;
-      state.onlineNum = res.data.onlineNum;
-      state.totalNum = res.data.totalNum;
-      state.alarmNum = res.data.alarmNum;
+const getData = async () => {
+  try {
+    const response = await leftCenterData();
+    if (response.data.code === 0) {
+      console.log("左中--AQI总览", response.data.data);
+      state.aqiLevel_1 = response.data.data.aqiLevel_1;
+      state.aqiLevel_2 = response.data.data.aqiLevel_2;
+      state.aqiLevel_3 = response.data.data.aqiLevel_3;
+      state.aqiLevel_4 = response.data.data.aqiLevel_4;
+      state.aqiLevel_5 = response.data.data.aqiLevel_5;
+      state.aqiLevel_6 = response.data.data.aqiLevel_6;
+      state.totalNum = response.data.data.aqiLevel_1 + response.data.data.aqiLevel_2 + response.data.data.aqiLevel_3 + response.data.data.aqiLevel_4 + response.data.data.aqiLevel_5 + response.data.data.aqiLevel_6;
       setOption();
-    }else{
-      ElMessage.error(res.msg)
+    } else {
+      ElMessage.error(response.data.msg);
     }
-  }).catch(err=>{
-    ElMessage.error(err)
-  });
+  } catch (error) {
+    ElMessage.error("请求失败，请检查网络连接");
+  }
 };
 getData();
 const setOption = () => {
@@ -54,6 +59,7 @@ const setOption = () => {
           },
           name: {
             color: "#ffffff",
+            fontSize: 16,
             lineHeight: 20,
           },
         },
@@ -69,7 +75,7 @@ const setOption = () => {
     },
     series: [
       {
-        name: "用户总览",
+        name: "AQI情况总览",
         type: "pie",
         radius: ["40%", "70%"],
         // avoidLabelOverlap: false,
@@ -109,38 +115,52 @@ const setOption = () => {
 
         labelLine: {
           show: true,
-          length: 20, // 第一段线 长度
+          length: 10, // 第一段线 长度
           length2: 36, // 第二段线 长度
           smooth: 0.2,
           lineStyle: {},
         },
         data: [
           {
-            value: state.onlineNum,
-            name: "在线",
+            value: state.aqiLevel_1,
+            name: "优级",
             itemStyle: {
-              color: echartsGraphic(["#0BFC7F", "#A3FDE0"]),
+              color: echartsGraphic(["#00e400", "#00e400"]),
             },
           },
           {
-            value: state.offlineNum,
-            name: "离线",
+            value: state.aqiLevel_2,
+            name: "良好",
             itemStyle: {
-              color: echartsGraphic(["#A0A0A0", "#DBDFDD"]),
+              color: echartsGraphic(["#ffff00", "#ffff00"]),
             },
           },
           {
-            value: state.lockNum,
-            name: "锁定",
+            value: state.aqiLevel_3,
+            name: "轻度污染",
             itemStyle: {
-              color: echartsGraphic(["#F48C02", "#FDDB7D"]),
+              color: echartsGraphic(["#ff7e00", "#ff7e00"]),
             },
           },
           {
-            value: state.alarmNum,
-            name: "异常",
+            value: state.aqiLevel_4,
+            name: "中度污染",
             itemStyle: {
-              color: echartsGraphic(["#F4023C", "#FB6CB7"]),
+              color: echartsGraphic(["#ff0000", "#ff0000"]),
+            },
+          },
+          {
+            value: state.aqiLevel_5,
+            name: "重度污染",
+            itemStyle: {
+              color: echartsGraphic(["#99004c", "#99004c"]),
+            },
+          },
+          {
+            value: state.aqiLevel_6,
+            name: "严重污染",
+            itemStyle: {
+              color: echartsGraphic(["#7e0023", "#7e0023"]),
             },
           },
         ],

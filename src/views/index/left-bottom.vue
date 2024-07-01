@@ -1,5 +1,6 @@
 <script setup lang="ts">
-import { leftBottom } from "@/api";
+// import { leftBottom } from "@/api";
+import { leftBottomData } from "@/api/dataScreen";
 import SeamlessScroll from "@/components/seamless-scroll";
 import { computed, onMounted, reactive } from "vue";
 import { useSettingStore } from "@/stores";
@@ -18,34 +19,64 @@ const state = reactive<any>({
   },
   scroll: true,
 });
-
-const getData = () => {
-  leftBottom( { limitNum: 20 })
-    .then((res) => {
-      console.log("左下--设备提醒", res);
-      if (res.success) {
-        state.list = res.data.list;
-      } else {
-        ElMessage({
-          message: res.msg,
-          type: "warning",
-        });
-      }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
-};
-const addressHandle = (item: any) => {
-  let name = item.provinceName;
-  if (item.cityName) {
-    name += "/" + item.cityName;
-    if (item.countyName) {
-      name += "/" + item.countyName;
+const getData = async () => {
+  try {
+    const response = await leftBottomData();
+    if (response.data.code === 0) {
+      console.log("左下--公众监督信息", response.data.data);
+      state.list = response.data.data;
+    } else {
+      ElMessage.error(response.data.msg);
     }
+  } catch (error) {
+    ElMessage.error("请求失败，请检查网络连接");
   }
-  return name;
 };
+const checkAQILevel = (item: any) => {
+  let aqi = item.aqiLevel;
+  if (aqi == 1) {
+    aqi = "优级";
+  } else if (aqi == 2) {
+    aqi = "良好";
+  } else if (aqi == 3) {
+    aqi = "轻度污染";
+  } else if (aqi == 4) {
+    aqi = "中度污染";
+  } else if (aqi == 5) {
+    aqi = "重度污染";
+  } else if (aqi == 6) {
+    aqi = "严重污染";
+  } else {
+    aqi = "无效";
+  }
+  return aqi;
+}
+const checkAQIColor = (item: any) => {
+  let aqi = item.aqiLevel;
+  if (aqi == 1) {
+    return "#00e400";
+  } else if (aqi == 2) {
+    return "#ffff00";
+  } else if (aqi == 3) {
+    return "#ff7e00";
+  } else if (aqi == 4) {
+    return "#ff0000";
+  } else if (aqi == 5) {
+    return "#99004c";
+  } else if (aqi == 6) {
+    return "#7e0023";
+  } else {
+    return "#000000";
+  }
+}
+const locationDeal1 = (item: any) => {
+  let res = item.location.split(" ");
+  return res[0] + "--" + res[1];
+}
+const locationDeal2 = (item: any) => {
+  let res = item.location.split(" ");
+  return res[2];
+}
 const comName = computed(() => {
   if (indexConfig.value.leftBottomSwiper) {
     return SeamlessScroll;
@@ -76,29 +107,30 @@ onMounted(() => {
           <span class="orderNum doudong">{{ i + 1 }}</span>
           <div class="inner_right">
             <div class="dibu"></div>
+
             <div class="flex">
               <div class="info">
-                <span class="labels">设备ID：</span>
-                <span class="text-content zhuyao doudong wangguan"> {{ item.gatewayno }}</span>
+                <span class="labels">监督员姓名：</span>
+                <span class="text-content zhuyao doudong wangguan"> {{ item.realName }}</span>
               </div>
+
               <div class="info">
                 <span class="labels">时间：</span>
-                <span class="text-content" style="font-size: 12px"> {{ item.createTime }}</span>
+                <span class="text-content" style="font-size: 12px"> {{ item.formattedTime }}</span>
               </div>
             </div>
 
-            <span
-              class="types doudong"
-              :class="{
-                typeRed: item.onlineState == 0,
-                typeGreen: item.onlineState == 1,
-              }"
-              >{{ item.onlineState == 1 ? "上线" : "下线" }}</span
-            >
+            <div class="aqi-box"
+                 :style="{ background: checkAQIColor(item) }">
+              <span>{{ checkAQILevel(item) }}</span>
+            </div>
 
             <div class="info addresswrap">
               <span class="labels">地址：</span>
-              <span class="text-content ciyao" style="font-size: 12px"> {{ addressHandle(item) }}</span>
+              <span class="text-content ciyao" style="font-size: 12px; display: flex; flex-direction: column;">
+                <span class="location-part">{{ locationDeal1(item) }}</span>
+                <span class="location-part">{{ locationDeal2(item) }}</span>
+              </span>
             </div>
           </div>
         </li>
@@ -139,7 +171,7 @@ onMounted(() => {
     }
 
     .info {
-      margin-right: 10px;
+      margin-right: -15px;
       display: flex;
       align-items: center;
       color: #fff;
@@ -224,5 +256,21 @@ onMounted(() => {
       color: #29fc29;
     }
   }
+}
+.aqi-box {
+  width: 60px;
+  height: 25px;
+  border-radius: 5px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+}
+.location-part {
+  display: block;
+  margin-bottom: 8px;
+}
+.text-content br {
+  line-height: 2;
 }
 </style>

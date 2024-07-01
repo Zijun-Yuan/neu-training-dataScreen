@@ -98,7 +98,7 @@
 | assets / css/     | 通用 CSS 文件，全局项目快捷样式调节                          |
 | components/echart | 所有 echart 图表（按照位置来命名）                           |
 | common/...        | 全局封装的 ECharts 和 flexible 插件代码（适配屏幕尺寸，可定制化修改） |
-| api/api.js        | 接口封装文件                                                 |
+| api/dataScreen.js        | 接口封装文件                                                 |
 | mock              | 模拟数据接口地址                                             |
 
 ###  

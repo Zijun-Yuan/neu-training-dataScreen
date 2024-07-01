@@ -3,24 +3,28 @@ import { ref, onMounted } from "vue";
 import { alarmNum } from "@/api";
 import { graphic } from "echarts/core";
 import { ElMessage } from "element-plus";
+import { rightTopData } from "@/api/dataScreen";
 
 const option = ref({});
-const getData = () => {
-  alarmNum()
-    .then((res) => {
-      console.log("右上--报警次数 ", res);
-      if (res.success) {
-        setOption(res.data.dateList, res.data.numList, res.data.numList2);
-      } else {
-        ElMessage({
-          message: res.msg,
-          type: "warning",
-        });
+const getData = async () => {
+  try {
+    const response = await rightTopData();
+    if (response.data.code === 0) {
+      console.log("右上--污染超标", response.data.data);
+      let res = response.data.data;
+      let month = [];
+      let exceedNum = [];
+      for (let i = res.length - 1; i >= 0; i--) {
+        month.push(res[i].monthTime);
+        exceedNum.push(res[i].exceedNum);
       }
-    })
-    .catch((err) => {
-      ElMessage.error(err);
-    });
+      setOption(month, exceedNum, null);
+    } else {
+      ElMessage.error(response.data.msg);
+    }
+  } catch (error) {
+    ElMessage.error("请求失败，请检查网络连接");
+  }
 };
 const setOption = async (xData: any[], yData: any[], yData2: any[]) => {
   option.value = {
@@ -87,7 +91,7 @@ const setOption = async (xData: any[], yData: any[], yData2: any[]) => {
         type: "line",
         smooth: true,
         symbol: "none", //去除点
-        name: "报警1次数",
+        name: "污染超标次数",
         color: "rgba(252,144,16,.7)",
         areaStyle: {
           //右，下，左，上
@@ -128,7 +132,7 @@ const setOption = async (xData: any[], yData: any[], yData2: any[]) => {
                 padding: [7, 14],
                 borderWidth: 0.5,
                 borderColor: "rgba(252,144,16,.5)",
-                formatter: "报警1：{c}",
+                formatter: "污染超标次数：{c}",
               },
             },
             {
